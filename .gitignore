@@ -1,0 +1,10 @@
+*.pt
+*.onnx
+*.engine
+*.torchscript
+*.pth
+*.zip
+
+dataset/
+rt-detr-cpp/build/
+rt-detr-cpp/libtorch/

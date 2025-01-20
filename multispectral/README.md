@@ -17,10 +17,4 @@ Since the convenient ultralytics version will no longer work, let's use a pytorc
 
 git clone https://github.com/lyuwenyu/RT-DETR
 
-intall the specific versions needed (older than the ultralytics version)
-
-```bash
-cd RT-DETR/rtdetr_pytorch
-pip install -r requirements.txt
-```
 

@@ -71,7 +71,8 @@ RUN pip install --no-cache-dir \
     pandas>=1.1.4 \
     seaborn>=0.11.0 \
     setuptools>=70.0.0 \
-    roboflow 
+    roboflow \
+    kornia>=0.6.11
 
 # for onnx export
 RUN pip install onnxruntime-gpu --index-url https://aiinfra.pkgs.visualstudio.com/PublicPackages/_packaging/onnxruntime-cuda-11/pypi/simple/ 

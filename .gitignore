@@ -9,7 +9,6 @@ dataset/
 rt-detr-cpp/build/
 rt-detr-cpp/libtorch/
 
-
 multispectral/Spectral_Images/
 multispectral/aligned
 multispectral/output

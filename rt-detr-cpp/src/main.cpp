@@ -253,7 +253,7 @@ int main()
 
         // Load image and preprocess
         std::cout << "Loading image..." << std::endl;
-        cv::Mat image = cv::imread("/home/appuser/object_detection/testim.jpg");
+        cv::Mat image = cv::imread("/home/appuser/object_detection/images/testim.jpg");
         if (image.empty())
         {
             std::cerr << "Error: Could not read the image." << std::endl;

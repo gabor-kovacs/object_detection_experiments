@@ -1,5 +1,9 @@
 # RT-DETR LibTorch Inference in C++
 
+This is a simple example to show how to use a trained pytorch model (RT-DETR) for object detection in C++.
+
+You have to export a trained model to TorchScript first to get a `.torchscript` file.
+
 Download LibTorch:
 
 ```bash

@@ -714,6 +714,10 @@ def apply_nms(boxes, scores, labels, iou_threshold=0.45):
 
 def main():
     parser = argparse.ArgumentParser()
+    # Dataset creation arguments
+    parser.add_argument('--create-aligned', action='store_true', help='Create aligned dataset for both train and test splits')
+    
+    # Training arguments
     parser.add_argument('--train', action='store_true', help='Train the model')
     parser.add_argument('--test', action='store_true', help='Test the model')
     parser.add_argument('--visualize-train', action='store_true', help='Visualize training data annotations')
@@ -722,15 +726,30 @@ def main():
     parser.add_argument('--batch-size', type=int, default=4, help='Batch size')
     parser.add_argument('--lr', type=float, default=5e-5, help='Learning rate')
     parser.add_argument('--patience', type=int, default=15, help='Early stopping patience')
+    
+    # Model parameters
+    parser.add_argument('--num-classes', type=int, default=2, help='Number of classes')
+    parser.add_argument('--model-path', type=str, default='multispectral/best.pth', help='Path to model checkpoint')
+    parser.add_argument('--output-dir', type=str, default='multispectral/output', help='Output directory for results')
+    
     args = parser.parse_args()
 
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
     workspace_root = '/home/appuser/object_detection'
     
+    # Create aligned dataset if requested
+    if args.create_aligned:
+        print("Creating aligned datasets...")
+        print("Processing training split...")
+        create_aligned_dataset(workspace_root, split='train')
+        print("\nProcessing test split...")
+        create_aligned_dataset(workspace_root, split='test')
+        return
+        
     if args.visualize_train:
         print("Visualizing training data...")
         train_dataset = MultispectralDataset(workspace_root, split='train')
-        output_dir = os.path.join(workspace_root, 'multispectral/output/train_vis')
+        output_dir = os.path.join(workspace_root, args.output_dir, 'train_vis')
         visualize_dataset(train_dataset, output_dir, args.vis_samples)
         return
         
@@ -758,7 +777,7 @@ def main():
         print(f"Training on {len(train_dataset)} images, validating on {len(val_dataset)} images")
         
         # Initialize model with frozen layers
-        model = build_rtdetr(num_classes=2)
+        model = build_rtdetr(num_classes=args.num_classes)
         model = model.to(device)
         
         # Modified weight dictionary with balanced weights
@@ -777,7 +796,7 @@ def main():
         )
         
         criterion = CustomCriterion(
-            num_classes=2,
+            num_classes=args.num_classes,
             matcher=matcher,
             weight_dict=weight_dict,
             losses=['focal', 'boxes'],
@@ -833,7 +852,7 @@ def main():
                 }
                 torch.save(
                     checkpoint,
-                    os.path.join(workspace_root, 'multispectral/best.pth')
+                    os.path.join(workspace_root, args.model_path)
                 )
                 print(f'New best model saved! Val Loss: {val_loss:.4f}')
             else:
@@ -861,12 +880,12 @@ def main():
     if args.test:
         print("Running inference...")
         # Create output directory
-        output_dir = os.path.join(workspace_root, 'multispectral/output/predictions')
+        output_dir = os.path.join(workspace_root, args.output_dir, 'predictions')
         os.makedirs(output_dir, exist_ok=True)
         
         # Load model
-        model = build_rtdetr(num_classes=2)
-        checkpoint = torch.load(os.path.join(workspace_root, 'multispectral/best.pth'))
+        model = build_rtdetr(num_classes=args.num_classes)
+        checkpoint = torch.load(os.path.join(workspace_root, args.model_path))
         model.load_state_dict(checkpoint['model'])
         model = model.to(device)
         model.eval()
@@ -882,7 +901,7 @@ def main():
         
         # Initialize post-processor
         postprocessor = RTDETRPostProcessor(
-            num_classes=2,
+            num_classes=args.num_classes,
             use_focal_loss=True,
             num_top_queries=300
         )
